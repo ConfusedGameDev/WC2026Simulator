@@ -27,13 +27,21 @@
   --mauve: #C9A0A0;
   --black: #000000;
   --white: #FFFFFF;
-  --bg: #050508;
-  --surface: #0d0d14;
-  --surface2: #13131e;
-  --border: rgba(255,255,255,0.08);
-  --text: #FFFFFF;
-  --text-muted: rgba(255,255,255,0.5);
-  --text-dim: rgba(255,255,255,0.25);
+
+  --bg:       #080b1a;
+  --surface:  #1A237E;
+  --surface2: #141a5e;
+  --surface3: #0f1445;
+  --accent:       #E00000;
+  --accent-hover: #FF4500;
+  --accent2:      #7B00D4;
+  --accent3:      #C6FF00;
+  --accent4:      #FF4500;
+  --border:     rgba(255,255,255,0.12);
+  --border-mid: rgba(255,255,255,0.22);
+  --text:       #FFFFFF;
+  --text-muted: rgba(255,255,255,0.65);
+  --text-dim:   rgba(255,255,255,0.35);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -64,7 +72,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(5,5,8,0.92);
+  background: rgba(8,11,26,0.96);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 0 1.5rem;
@@ -83,7 +91,7 @@ header {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   letter-spacing: 0.04em;
-  background: linear-gradient(90deg, var(--lime), var(--cyan), var(--cobalt));
+  background: linear-gradient(90deg, var(--red), var(--purple), var(--cobalt));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -96,8 +104,8 @@ header {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .1em;
-  color: var(--black);
-  background: var(--lime);
+  color: var(--white);
+  background: var(--red);
   padding: 2px 8px;
   border-radius: 2px;
 }
@@ -119,8 +127,8 @@ header {
   background: var(--border);
   transition: background 0.3s;
 }
-.progress-pip.done { background: var(--lime); }
-.progress-pip.active { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.progress-pip.done { background: var(--orange); }
+.progress-pip.active { background: var(--red); box-shadow: 0 0 8px var(--red); }
 
 /* ── NAV TABS ── */
 .nav-bar {
@@ -158,15 +166,15 @@ header {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 2px;
-  background: var(--cyan);
+  background: var(--lime);
   transform: scaleX(0);
   transition: transform 0.2s;
 }
 .nav-tab:hover { color: var(--text-muted); }
-.nav-tab.active { color: var(--cyan); }
+.nav-tab.active { color: var(--lime); }
 .nav-tab.active::after { transform: scaleX(1); }
 .nav-tab.done { color: var(--text-muted); }
-.nav-tab.done::after { background: var(--lime); transform: scaleX(1); opacity: 0.4; }
+.nav-tab.done::after { background: var(--orange); transform: scaleX(1); opacity: 0.6; }
 
 /* ── MAIN ── */
 main {
@@ -215,33 +223,33 @@ main {
   text-transform: uppercase;
   padding: 8px 18px;
   border-radius: 3px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-mid);
   background: var(--surface2);
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s;
 }
-.btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text); background: var(--surface); }
 
 .btn-primary {
-  background: var(--lime);
-  color: var(--black);
-  border-color: var(--lime);
+  background: var(--red);
+  color: var(--white);
+  border-color: var(--red);
 }
-.btn-primary:hover { background: #d4ff00; border-color: #d4ff00; color: var(--black); }
+.btn-primary:hover { background: var(--orange); border-color: var(--orange); color: var(--white); }
 
 .btn-accent {
-  background: var(--cyan);
-  color: var(--black);
-  border-color: var(--cyan);
+  background: var(--purple);
+  color: var(--white);
+  border-color: var(--purple);
 }
-.btn-accent:hover { background: #00f5de; border-color: #00f5de; color: var(--black); }
+.btn-accent:hover { background: #9b20f5; border-color: #9b20f5; color: var(--white); }
 
 .btn-danger {
-  border-color: rgba(224,0,0,0.4);
-  color: var(--red);
+  border-color: rgba(107,15,26,0.6);
+  color: var(--salmon);
 }
-.btn-danger:hover { background: rgba(224,0,0,0.1); }
+.btn-danger:hover { background: rgba(107,15,26,0.3); }
 
 /* ── GROUP GRID ── */
 .group-grid {
@@ -281,7 +289,7 @@ main {
   border-radius: 2px;
 }
 
-.group-matches { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+.group-matches { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 
 .match-row {
   display: flex;
@@ -292,7 +300,7 @@ main {
   background: var(--surface2);
   transition: background 0.15s;
 }
-.match-row:hover { background: rgba(255,255,255,0.04); }
+.match-row:hover { background: var(--surface3); }
 
 .match-flag { font-size: 16px; width: 22px; text-align: center; }
 
@@ -313,10 +321,10 @@ main {
 .score-input {
   width: 34px;
   text-align: center;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--surface3);
+  border: 1px solid var(--border-mid);
   border-radius: 3px;
-  color: var(--lime);
+  color: var(--yellow);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 16px;
   font-weight: 700;
@@ -325,7 +333,7 @@ main {
 }
 .score-input:focus {
   outline: none;
-  border-color: var(--cyan);
+  border-color: var(--orange);
 }
 .score-input::placeholder { color: var(--text-dim); }
 
@@ -385,13 +393,13 @@ main {
 .standings-table td:first-child { text-align: left; }
 .standings-table tr:last-child td { border-bottom: none; }
 
-.rank-q1 { background: rgba(0,229,204,0.08); border-left: 2px solid var(--cyan); }
-.rank-q2 { background: rgba(198,255,0,0.06); border-left: 2px solid var(--lime); }
-.rank-q3 { background: rgba(255,255,0,0.04); border-left: 2px solid rgba(255,255,0,0.3); }
+.rank-q1 { background: rgba(224,0,0,0.12); border-left: 2px solid var(--red); }
+.rank-q2 { background: rgba(61,90,254,0.12); border-left: 2px solid var(--cobalt); }
+.rank-q3 { background: rgba(255,69,0,0.08); border-left: 2px solid rgba(255,69,0,0.4); }
 
 .pts-cell { font-weight: 700; color: var(--lime); }
-.gd-pos { color: var(--cyan); }
-.gd-neg { color: var(--red); }
+.gd-pos { color: var(--green); }
+.gd-neg { color: var(--salmon); }
 
 .team-cell { display: flex; align-items: center; gap: 7px; }
 .team-cell-flag { font-size: 15px; }
@@ -422,14 +430,14 @@ main {
   font-family: 'Barlow Condensed', sans-serif;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-.third-table tr.advancing td { background: rgba(255,255,0,0.04); border-left: 2px solid rgba(255,255,0,0.4); }
+.third-table tr.advancing td { background: rgba(255,69,0,0.08); border-left: 2px solid rgba(255,69,0,0.5); }
 .advancing-badge {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
-  background: rgba(255,255,0,0.15);
-  color: var(--yellow);
+  background: rgba(255,69,0,0.2);
+  color: var(--orange);
   padding: 2px 7px;
   border-radius: 2px;
 }
@@ -444,7 +452,7 @@ main {
   overflow: hidden;
   transition: border-color 0.2s;
 }
-.ko-match-card:hover { border-color: rgba(255,255,255,0.15); }
+.ko-match-card:hover { border-color: var(--border-mid); }
 
 .ko-match-inner {
   display: flex;
@@ -488,10 +496,9 @@ main {
 
 .ko-winner-flag {
   margin-left: 6px;
-  font-size: 13px;
-  background: rgba(0,229,204,0.12);
-  color: var(--cyan);
-  border: 1px solid rgba(0,229,204,0.3);
+  background: rgba(255,69,0,0.15);
+  color: var(--orange);
+  border: 1px solid rgba(255,69,0,0.4);
   border-radius: 3px;
   padding: 2px 8px;
   font-family: 'Barlow Condensed', sans-serif;
@@ -506,11 +513,11 @@ main {
   align-items: center;
   gap: 8px;
   padding: 6px 14px 8px;
-  background: rgba(255,255,0,0.04);
-  border-top: 1px solid rgba(255,255,0,0.1);
+  background: rgba(255,69,0,0.08);
+  border-top: 1px solid rgba(255,69,0,0.2);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 12px;
-  color: var(--yellow);
+  color: var(--orange);
 }
 
 .ko-match-label {
@@ -569,7 +576,7 @@ main {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(198,255,0,0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(224,0,0,0.1) 0%, transparent 70%);
 }
 .champion-emoji { font-size: 64px; display: block; margin-bottom: 1rem; }
 .champion-label {
@@ -578,7 +585,7 @@ main {
   font-weight: 700;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: var(--lime);
+  color: var(--orange);
   margin-bottom: 8px;
 }
 .champion-name {
@@ -614,31 +621,31 @@ main {
   margin-bottom: 1.5rem;
 }
 .share-url-box {
-  background: var(--bg);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 10px 14px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 12px;
-  color: var(--cyan);
+  color: var(--sky);
   word-break: break-all;
   margin-bottom: 12px;
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.share-url-box:hover { border-color: var(--cyan); }
+.share-url-box:hover { border-color: var(--cobalt); }
 
 #qr-canvas {
   display: block;
   margin: 1.5rem 0;
   border-radius: 8px;
-  border: 2px solid var(--border);
+  border: 2px solid var(--red);
 }
 
 .copy-flash {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 12px;
-  color: var(--lime);
+  color: var(--green);
   margin-left: 8px;
   opacity: 0;
   transition: opacity 0.3s;
@@ -647,13 +654,13 @@ main {
 
 /* ── ALERTS / INFO ── */
 .info-banner {
-  background: rgba(0,229,204,0.06);
-  border: 1px solid rgba(0,229,204,0.15);
+  background: rgba(61,90,254,0.1);
+  border: 1px solid rgba(61,90,254,0.3);
   border-radius: 4px;
   padding: 10px 14px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 13px;
-  color: var(--cyan);
+  color: var(--sky);
   margin-bottom: 1.25rem;
   display: flex;
   gap: 8px;
@@ -688,11 +695,94 @@ main {
 .group-tag.gk { background: rgba(255,140,105,0.15); }
 .group-tag.gl { background: rgba(255,255,255,0.08); }
 
+/* ── RESULT TOGGLE ── */
+.match-block { display: flex; flex-direction: column; }
+
+.rtog-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  background: var(--surface3);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.rtog-btn:hover { color: var(--text-muted); background: rgba(255,255,255,0.08); }
+
+.match-row-aligned {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--surface2);
+  transition: background 0.15s;
+}
+.match-row-aligned:hover { background: var(--surface3); }
+
+.match-col-team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.match-col-team.right { align-items: flex-end; }
+
+.match-col-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 0 6px;
+}
+
+.match-team-inner {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.match-team-inner.right { flex-direction: row-reverse; }
+
+.match-score-inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.win-btn {
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  width: 100%;
+  text-align: center;
+}
+.win-btn.active-h1 { background: rgba(0,230,118,0.18); color: var(--green); border-color: rgba(0,230,118,0.4); }
+.win-btn.active-h2 { background: rgba(233,30,140,0.18); color: var(--hot-pink); border-color: rgba(233,30,140,0.4); }
+
+.draw-btn {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  width: 100%;
+  text-align: center;
+}
+.draw-btn.active-draw { background: rgba(255,69,0,0.18); color: var(--orange); border-color: rgba(255,69,0,0.4); }
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-thumb { background: rgba(61,90,254,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(61,90,254,0.5); }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
@@ -761,7 +851,7 @@ main {
     </div>
     <div class="info-banner">
       <span class="info-icon">★</span>
-      <span><strong style="color:var(--cyan)">Cyan</strong> = Group winner · <strong style="color:var(--lime)">Lime</strong> = Runner-up · <strong style="color:var(--yellow)">Yellow</strong> = Best 3rd (8 of 12 advance)</span>
+      <span><strong style="color:var(--red)">Red</strong> = Group winner · <strong style="color:var(--cobalt)">Blue</strong> = Runner-up · <strong style="color:var(--orange)">Orange</strong> = Best 3rd (8 of 12 advance)</span>
     </div>
     <div class="standings-grid" id="standings-container"></div>
     <div class="third-section" id="third-place-section"></div>
@@ -933,6 +1023,14 @@ function updateProgress(){
 }
 
 /* ── GROUPS RENDER ── */
+function getToggleState(sc){
+  if(sc.h===''&&sc.a==='') return null;
+  const h=parseInt(sc.h)||0, a=parseInt(sc.a)||0;
+  if(h>a) return 'h1';
+  if(a>h) return 'h2';
+  return 'draw';
+}
+
 function renderGroups(){
   const c = document.getElementById('groups-container');
   c.innerHTML = '';
@@ -949,14 +1047,34 @@ function renderGroups(){
       <div class="group-matches">
         ${ms.map((m,i)=>{
           const key=`${g}_${i}`, sc=groupScores[key]||{h:'',a:''};
-          return`<div class="match-row">
-            <span class="match-flag">${flag(m[0])}</span>
-            <span class="match-name">${name(m[0])}</span>
-            <input class="score-input" type="number" min="0" max="20" value="${sc.h}" placeholder="0" oninput="setScore('${key}',this.value,null)">
-            <span class="match-sep">–</span>
-            <input class="score-input" type="number" min="0" max="20" value="${sc.a}" placeholder="0" oninput="setScore('${key}',null,this.value)">
-            <span class="match-name right">${name(m[1])}</span>
-            <span class="match-flag">${flag(m[1])}</span>
+          const tog=getToggleState(sc);
+          return`<div class="match-block">
+            <div class="match-row-aligned">
+              <div class="match-col-team">
+                <button class="rtog-btn win-btn ${tog==='h1'?'active-h1':''}" onclick="applyToggle('${key}','h1','${g}')">Win</button>
+                <div class="match-team-inner">
+                  <span class="match-flag">${flag(m[0])}</span>
+                  <span class="match-name">${name(m[0])}</span>
+                </div>
+              </div>
+              <div class="match-col-score">
+                <button class="rtog-btn draw-btn ${tog==='draw'?'active-draw':''}" onclick="applyToggle('${key}','draw','${g}')">Draw</button>
+                <div class="match-score-inner">
+                  <input class="score-input" type="number" min="0" max="20" value="${sc.h}" placeholder="0"
+                    oninput="setScoreWithAutoZero('${key}',this.value,null,'${g}')">
+                  <span class="match-sep">–</span>
+                  <input class="score-input" type="number" min="0" max="20" value="${sc.a}" placeholder="0"
+                    oninput="setScoreWithAutoZero('${key}',null,this.value,'${g}')">
+                </div>
+              </div>
+              <div class="match-col-team right">
+                <button class="rtog-btn win-btn ${tog==='h2'?'active-h2':''}" onclick="applyToggle('${key}','h2','${g}')">Win</button>
+                <div class="match-team-inner right">
+                  <span class="match-name right">${name(m[1])}</span>
+                  <span class="match-flag">${flag(m[1])}</span>
+                </div>
+              </div>
+            </div>
           </div>`;
         }).join('')}
       </div>`;
@@ -968,6 +1086,45 @@ function setScore(key,h,a){
   if(!groupScores[key]) groupScores[key]={h:'',a:''};
   if(h!==null) groupScores[key].h=h;
   if(a!==null) groupScores[key].a=a;
+}
+
+function setScoreWithAutoZero(key,h,a,g){
+  if(!groupScores[key]) groupScores[key]={h:'',a:''};
+  if(h!==null){
+    groupScores[key].h=h;
+    // auto-zero the other side if it's still empty
+    if(groupScores[key].a==='') groupScores[key].a='0';
+  }
+  if(a!==null){
+    groupScores[key].a=a;
+    if(groupScores[key].h==='') groupScores[key].h='0';
+  }
+  // re-render just this group card to update toggle highlight
+  renderGroups();
+  updateProgress();
+}
+
+function applyToggle(key,result,g){
+  if(!groupScores[key]) groupScores[key]={h:'',a:''};
+  const sc=groupScores[key];
+  // If scores are set, just flip them to match; if not, default to 2-0
+  const curH=sc.h!==''?parseInt(sc.h):null;
+  const curA=sc.a!==''?parseInt(sc.a):null;
+  if(result==='h1'){
+    if(curH!==null&&curA!==null){
+      // ensure h1 wins: if currently drawn or h2 wins, flip to 2-0
+      if(curH<=curA){ groupScores[key].h='2'; groupScores[key].a='0'; }
+    } else { groupScores[key].h='2'; groupScores[key].a='0'; }
+  } else if(result==='draw'){
+    const goal=curH!==null?curH:(curA!==null?curA:1);
+    groupScores[key].h=goal+''; groupScores[key].a=goal+'';
+  } else if(result==='h2'){
+    if(curH!==null&&curA!==null){
+      if(curA<=curH){ groupScores[key].h='0'; groupScores[key].a='2'; }
+    } else { groupScores[key].h='0'; groupScores[key].a='2'; }
+  }
+  renderGroups();
+  updateProgress();
 }
 
 function randomizeGroups(){
@@ -1272,22 +1429,22 @@ function drawQR(text){
   canvas.style.display='block';
   const ctx=canvas.getContext('2d');
   const size=canvas.width;
-  ctx.fillStyle='#0d0d14';
+  ctx.fillStyle='#1A237E';
   ctx.fillRect(0,0,size,size);
   const cols=Math.ceil(Math.sqrt(text.length))+4;
   const cell=Math.floor(size/cols);
-  ctx.fillStyle='#C6FF00';
+  ctx.fillStyle='#FFFFFF';
   for(let i=0;i<text.length;i++){
     const c=text.charCodeAt(i);
     const x=(i%cols)*cell, y=Math.floor(i/cols)*cell;
     if(c%2===0) ctx.fillRect(x+1,y+1,cell-2,cell-2);
   }
-  ctx.strokeStyle='#00E5CC';ctx.lineWidth=2;ctx.strokeRect(2,2,size-4,size-4);
+  ctx.strokeStyle='#E00000';ctx.lineWidth=3;ctx.strokeRect(2,2,size-4,size-4);
   const qw=cell*3;
   [[4,4],[size-4-qw,4],[4,size-4-qw]].forEach(([px,py])=>{
-    ctx.fillStyle='#00E5CC';ctx.fillRect(px,py,qw,qw);
-    ctx.fillStyle='#0d0d14';ctx.fillRect(px+cell*.5,py+cell*.5,qw-cell,qw-cell);
-    ctx.fillStyle='#00E5CC';ctx.fillRect(px+cell,py+cell,cell,cell);
+    ctx.fillStyle='#E00000';ctx.fillRect(px,py,qw,qw);
+    ctx.fillStyle='#1A237E';ctx.fillRect(px+cell*.5,py+cell*.5,qw-cell,qw-cell);
+    ctx.fillStyle='#E00000';ctx.fillRect(px+cell,py+cell,cell,cell);
   });
 }
 
