@@ -112,6 +112,33 @@ header {
 
 .header-spacer { flex: 1; }
 
+/* ── LANGUAGE SWITCHER ── */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface2);
+  border: 1px solid var(--border-mid);
+  border-radius: 4px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.lang-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  padding: 4px 10px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+.lang-btn:hover { color: var(--text-muted); background: rgba(255,255,255,0.06); }
+.lang-btn.active { background: var(--red); color: var(--white); }
+
 .header-progress {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 12px;
@@ -271,6 +298,24 @@ main {
   justify-content: space-between;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
+}
+
+.group-sim-btn {
+  font-size: 14px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border-mid);
+  background: var(--surface2);
+  color: var(--yellow);
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.group-sim-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+  transform: scale(1.08);
 }
 
 .group-label {
@@ -794,14 +839,20 @@ main {
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7664389194036942"
      crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <div class="logo">WC 2026 Simulator</div>
-    <div class="header-badge">Official</div>
+    <div class="logo" id="logo-text">WC 2026 Simulator</div>
+    <div class="header-badge" id="badge-text">Official</div>
     <div class="header-spacer"></div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('jp')">JP</button>
+      <button class="lang-btn" onclick="setLang('es')">ES</button>
+    </div>
     <div class="header-progress" id="progress-pips"></div>
   </div>
 </header>
@@ -816,6 +867,7 @@ main {
     <button class="nav-tab" onclick="showTab('sf')">Semifinals</button>
     <button class="nav-tab" onclick="showTab('final')">Final</button>
     <button class="nav-tab" onclick="showTab('share')">Share</button>
+    <button class="nav-tab" onclick="showTab('bracket')">Bracket</button>
   </div>
 </nav>
 
@@ -824,17 +876,17 @@ main {
   <div id="tab-groups" class="screen active">
     <div class="section-header">
       <div>
-        <div class="section-title">Group Stage</div>
-        <div class="section-sub">12 groups · 48 teams · June 11–27, 2026</div>
+        <div class="section-title" id="sect-groups-title">Group Stage</div>
+        <div class="section-sub" id="sect-groups-sub">12 groups · 48 teams · June 11–27, 2026</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="randomizeGroups()">Auto-simulate all</button>
-        <button class="btn btn-danger" onclick="clearGroups()">Clear</button>
+        <button class="btn btn-primary" id="btn-auto-all" onclick="randomizeGroups()">Auto-simulate all</button>
+        <button class="btn btn-danger" id="btn-clear" onclick="clearGroups()">Clear</button>
       </div>
     </div>
     <div class="group-grid" id="groups-container"></div>
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn btn-accent" onclick="showTab('standings')">View standings →</button>
+      <button class="btn btn-accent" id="btn-view-standings" onclick="showTab('standings')">View standings →</button>
     </div>
   </div>
 
@@ -842,16 +894,16 @@ main {
   <div id="tab-standings" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">Standings</div>
-        <div class="section-sub">Top 2 per group advance · Best 8 third-placed teams also advance</div>
+        <div class="section-title" id="sect-standings-title">Standings</div>
+        <div class="section-sub" id="sect-standings-sub">Top 2 per group advance · Best 8 third-placed teams also advance</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="buildR32();showTab('r32')">Continue →</button>
+        <button class="btn btn-primary" id="btn-continue-r32" onclick="buildR32();showTab('r32')">Continue →</button>
       </div>
     </div>
     <div class="info-banner">
       <span class="info-icon">★</span>
-      <span><strong style="color:var(--red)">Red</strong> = Group winner · <strong style="color:var(--cobalt)">Blue</strong> = Runner-up · <strong style="color:var(--orange)">Orange</strong> = Best 3rd (8 of 12 advance)</span>
+      <span id="info-banner-text"><strong style="color:var(--red)">Red</strong> = Group winner · <strong style="color:var(--cobalt)">Blue</strong> = Runner-up · <strong style="color:var(--orange)">Orange</strong> = Best 3rd (8 of 12 advance)</span>
     </div>
     <div class="standings-grid" id="standings-container"></div>
     <div class="third-section" id="third-place-section"></div>
@@ -861,17 +913,17 @@ main {
   <div id="tab-r32" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">Round of 32</div>
-        <div class="section-sub">June 28–July 3 · Matches 73–88 · Official FIFA bracket</div>
+        <div class="section-title" id="sect-r32-title">Round of 32</div>
+        <div class="section-sub" id="sect-r32-sub">June 28–July 3 · Matches 73–88 · Official FIFA bracket</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="randomizeRound('r32')">Auto-simulate</button>
-        <button class="btn" onclick="buildR32()">Refresh</button>
+        <button class="btn btn-primary" id="btn-auto-r32" onclick="randomizeRound('r32')">Auto-simulate</button>
+        <button class="btn" id="btn-refresh-r32" onclick="buildR32()">Refresh</button>
       </div>
     </div>
     <div id="r32-container"></div>
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn btn-accent" onclick="buildR16();showTab('r16')">Continue to R16 →</button>
+      <button class="btn btn-accent" id="btn-continue-r16" onclick="buildR16();showTab('r16')">Continue to R16 →</button>
     </div>
   </div>
 
@@ -879,16 +931,16 @@ main {
   <div id="tab-r16" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">Round of 16</div>
-        <div class="section-sub">July 4–7 · 16 teams remain</div>
+        <div class="section-title" id="sect-r16-title">Round of 16</div>
+        <div class="section-sub" id="sect-r16-sub">July 4–7 · 16 teams remain</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="randomizeRound('r16')">Auto-simulate</button>
+        <button class="btn btn-primary" id="btn-auto-r16" onclick="randomizeRound('r16')">Auto-simulate</button>
       </div>
     </div>
     <div id="r16-container"></div>
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn btn-accent" onclick="buildQF();showTab('qf')">Continue to QF →</button>
+      <button class="btn btn-accent" id="btn-continue-qf" onclick="buildQF();showTab('qf')">Continue to QF →</button>
     </div>
   </div>
 
@@ -896,16 +948,16 @@ main {
   <div id="tab-qf" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">Quarterfinals</div>
-        <div class="section-sub">July 9–11 · 8 teams remain</div>
+        <div class="section-title" id="sect-qf-title">Quarterfinals</div>
+        <div class="section-sub" id="sect-qf-sub">July 9–11 · 8 teams remain</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="randomizeRound('qf')">Auto-simulate</button>
+        <button class="btn btn-primary" id="btn-auto-qf" onclick="randomizeRound('qf')">Auto-simulate</button>
       </div>
     </div>
     <div id="qf-container"></div>
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn btn-accent" onclick="buildSF();showTab('sf')">Continue to SF →</button>
+      <button class="btn btn-accent" id="btn-continue-sf" onclick="buildSF();showTab('sf')">Continue to SF →</button>
     </div>
   </div>
 
@@ -913,16 +965,16 @@ main {
   <div id="tab-sf" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">Semifinals</div>
-        <div class="section-sub">July 14–15 · 4 teams remain</div>
+        <div class="section-title" id="sect-sf-title">Semifinals</div>
+        <div class="section-sub" id="sect-sf-sub">July 14–15 · 4 teams remain</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="randomizeRound('sf')">Auto-simulate</button>
+        <button class="btn btn-primary" id="btn-auto-sf" onclick="randomizeRound('sf')">Auto-simulate</button>
       </div>
     </div>
     <div id="sf-container"></div>
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn btn-accent" onclick="buildFinal();showTab('final')">Continue to Final →</button>
+      <button class="btn btn-accent" id="btn-continue-final" onclick="buildFinal();showTab('final')">Continue to Final →</button>
     </div>
   </div>
 
@@ -930,17 +982,17 @@ main {
   <div id="tab-final" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">The Final</div>
-        <div class="section-sub">July 19, 2026 · MetLife Stadium, New Jersey</div>
+        <div class="section-title" id="sect-final-title">The Final</div>
+        <div class="section-sub" id="sect-final-sub">July 19, 2026 · MetLife Stadium, New Jersey</div>
       </div>
       <div class="btn-row" style="margin:0">
-        <button class="btn btn-primary" onclick="randomizeRound('final')">Auto-simulate</button>
+        <button class="btn btn-primary" id="btn-auto-final" onclick="randomizeRound('final')">Auto-simulate</button>
       </div>
     </div>
     <div id="final-container"></div>
     <div id="champion-display"></div>
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn btn-accent" onclick="showTab('share')">Share your bracket →</button>
+      <button class="btn btn-accent" id="btn-share-bracket" onclick="showTab('share')">Share your bracket →</button>
     </div>
   </div>
 
@@ -948,23 +1000,298 @@ main {
   <div id="tab-share" class="screen">
     <div class="section-header">
       <div>
-        <div class="section-title">Share Your Bracket</div>
-        <div class="section-sub">Your simulation is encoded in the URL — no account needed</div>
+        <div class="section-title" id="sect-share-title">Share Your Bracket</div>
+        <div class="section-sub" id="sect-share-sub">Your simulation is encoded in the URL — no account needed</div>
       </div>
     </div>
     <div class="share-card">
-      <p class="share-desc">Generate a shareable link with your full simulation. Anyone with the link can view your bracket.</p>
+      <p class="share-desc" id="btn-share-desc">Generate a shareable link with your full simulation. Anyone with the link can view your bracket.</p>
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="generateShare()">Generate link</button>
-        <button class="btn" onclick="copyLink()">Copy link <span class="copy-flash" id="copy-flash">Copied!</span></button>
+        <button class="btn btn-primary" id="btn-generate-link" onclick="generateShare()">Generate link</button>
+        <button class="btn" id="btn-copy-link" onclick="copyLink()">Copy link <span class="copy-flash" id="copy-flash">Copied!</span></button>
       </div>
       <div class="share-url-box" id="share-url-text" onclick="copyLink()">Click "Generate link" to create your shareable URL.</div>
-      <canvas id="qr-canvas" width="180" height="180" style="display:none"></canvas>
+      <div id="qr-container" style="margin-top:1rem"></div>
     </div>
+  </div>
+
+  <!-- BRACKET -->
+  <div id="tab-bracket" class="screen">
+    <div class="section-header">
+      <div>
+        <div class="section-title" id="sect-bracket-title">Bracket</div>
+        <div class="section-sub" id="sect-bracket-sub">Full tournament bracket · Round of 32 → Final</div>
+      </div>
+      <div class="btn-row" style="margin:0">
+        <button class="btn btn-primary" onclick="renderBracket()">Refresh bracket</button>
+      </div>
+    </div>
+    <div id="bracket-container" style="overflow-x:auto;overflow-y:auto"></div>
   </div>
 </main>
 
 <script>
+/* ── TRANSLATIONS ── */
+const I18N = {
+  en: {
+    logo: 'WC 2026 Simulator',
+    badge: 'Official',
+    nav: ['Groups','Standings','Round of 32','Round of 16','Quarterfinals','Semifinals','Final','Share','Bracket'],
+    autoSimulate: 'Auto-simulate all',
+    clear: 'Clear',
+    viewStandings: 'View standings →',
+    continueBtn: 'Continue →',
+    autoSim: 'Auto-simulate',
+    refresh: 'Refresh',
+    continueR16: 'Continue to R16 →',
+    continueQF: 'Continue to QF →',
+    continueSF: 'Continue to SF →',
+    continueFinal: 'Continue to Final →',
+    shareTitle: 'Share Your Bracket',
+    shareSub: 'Your simulation is encoded in the URL — no account needed',
+    shareDesc: 'Generate a shareable link with your full simulation. Anyone with the link can view your bracket.',
+    generateLink: 'Generate link',
+    copyLink: 'Copy link',
+    copied: 'Copied!',
+    sharePrompt: 'Click "Generate link" to create your shareable URL.',
+    shareYourBracket: 'Share your bracket →',
+    groupStageSub: '12 groups · 48 teams · June 11–27, 2026',
+    standingsSub: 'Top 2 per group advance · Best 8 third-placed teams also advance',
+    r32Sub: 'June 28–July 3 · Matches 73–88 · Official FIFA bracket',
+    r16Sub: 'July 4–7 · 16 teams remain',
+    qfSub: 'July 9–11 · 8 teams remain',
+    sfSub: 'July 14–15 · 4 teams remain',
+    finalSub: 'July 19, 2026 · MetLife Stadium, New Jersey',
+    infoBanner: '<strong style="color:var(--red)">Red</strong> = Group winner · <strong style="color:var(--cobalt)">Blue</strong> = Runner-up · <strong style="color:var(--orange)">Orange</strong> = Best 3rd (8 of 12 advance)',
+    bestThird: 'Best Third-Placed Teams',
+    winBtn: 'Win',
+    drawBtn: 'Draw',
+    champion: '🏆 FIFA World Cup 2026 Champion',
+    venue: 'MetLife Stadium · East Rutherford, NJ · July 19, 2026',
+    tbdLabel: 'TBD',
+    winLabel: 'WIN',
+    penalties: '⚡ Penalties:',
+    thirdHeaders: ['#','Team','Group','Pts','GD','GF',''],
+    advances: 'Advances',
+    standingsHeaders: ['Team','P','W','D','L','GD','Pts'],
+    matchLabel: (id) => typeof id==='number'?`Match ${id}`:id.replace(/-/g,' '),
+  },
+  jp: {
+    logo: 'W杯2026シミュレーター',
+    badge: '公式',
+    nav: ['グループ','順位表','ラウンド32','ラウンド16','準々決勝','準決勝','決勝','シェア','ブラケット'],
+    autoSimulate: '全て自動シミュレート',
+    clear: 'クリア',
+    viewStandings: '順位表を見る →',
+    continueBtn: '続ける →',
+    autoSim: '自動シミュレート',
+    refresh: '更新',
+    continueR16: 'R16へ続ける →',
+    continueQF: '準々決勝へ →',
+    continueSF: '準決勝へ →',
+    continueFinal: '決勝へ →',
+    shareTitle: 'ブラケットをシェア',
+    shareSub: 'シミュレーションはURLにエンコードされています',
+    shareDesc: 'シェアリンクを生成します。リンクを持つ誰でもあなたのブラケットを見ることができます。',
+    generateLink: 'リンク生成',
+    copyLink: 'コピー',
+    copied: 'コピーしました！',
+    sharePrompt: '「リンク生成」をクリックしてURLを作成してください。',
+    shareYourBracket: 'ブラケットをシェア →',
+    groupStageSub: '12グループ · 48チーム · 2026年6月11日〜27日',
+    standingsSub: '各グループ上位2チームが通過 · ベスト8の3位チームも通過',
+    r32Sub: '6月28日〜7月3日 · 試合73〜88 · 公式FIFAブラケット',
+    r16Sub: '7月4日〜7日 · 残り16チーム',
+    qfSub: '7月9日〜11日 · 残り8チーム',
+    sfSub: '7月14日〜15日 · 残り4チーム',
+    finalSub: '2026年7月19日 · メットライフ・スタジアム、ニュージャージー',
+    infoBanner: '<strong style="color:var(--red)">赤</strong> = 1位 · <strong style="color:var(--cobalt)">青</strong> = 2位 · <strong style="color:var(--orange)">橙</strong> = ベスト3位（12チーム中8チーム通過）',
+    bestThird: 'ベスト3位チーム',
+    winBtn: '勝利',
+    drawBtn: '引分',
+    champion: '🏆 FIFA ワールドカップ 2026 チャンピオン',
+    venue: 'メットライフ・スタジアム · NJ · 2026年7月19日',
+    tbdLabel: '未定',
+    winLabel: '勝利',
+    penalties: '⚡ PK戦：',
+    thirdHeaders: ['#','チーム','組','勝点','得失点','得点',''],
+    advances: '通過',
+    standingsHeaders: ['チーム','試','勝','分','敗','得失','勝点'],
+    matchLabel: (id) => typeof id==='number'?`試合 ${id}`:id.replace('R16','R16').replace('QF','QF').replace('SF','SF').replace('FINAL','決勝').replace(/-/g,' '),
+  },
+  es: {
+    logo: 'Simulador Mundial Fifa 2026',
+    badge: 'Oficial',
+    nav: ['Grupos','Tabla','Ronda de 32','Octavos','Cuartos','Semis','Final','Compartir','Bracket'],
+    autoSimulate: 'Simular todo',
+    clear: 'Limpiar',
+    viewStandings: 'Ver tabla →',
+    continueBtn: 'Continuar →',
+    autoSim: 'Auto-simular',
+    refresh: 'Actualizar',
+    continueR16: 'Continuar a Octavos →',
+    continueQF: 'Continuar a Cuartos →',
+    continueSF: 'Continuar a Semis →',
+    continueFinal: 'Continuar a la Final →',
+    shareTitle: 'Comparte tu Bracket',
+    shareSub: 'Tu simulación está codificada en la URL — sin cuenta necesaria',
+    shareDesc: 'Genera un enlace para compartir tu simulación completa. Cualquiera con el enlace puede ver tu bracket.',
+    generateLink: 'Generar enlace',
+    copyLink: 'Copiar enlace',
+    copied: '¡Copiado!',
+    sharePrompt: 'Haz clic en "Generar enlace" para crear tu URL.',
+    shareYourBracket: 'Comparte tu bracket →',
+    groupStageSub: '12 grupos · 48 equipos · 11–27 de junio, 2026',
+    standingsSub: 'Top 2 por grupo avanzan · Los mejores 8 terceros también avanzan',
+    r32Sub: '28 jun–3 jul · Partidos 73–88 · Bracket oficial FIFA',
+    r16Sub: '4–7 de julio · Quedan 16 equipos',
+    qfSub: '9–11 de julio · Quedan 8 equipos',
+    sfSub: '14–15 de julio · Quedan 4 equipos',
+    finalSub: '19 de julio, 2026 · MetLife Stadium, Nueva Jersey',
+    infoBanner: '<strong style="color:var(--red)">Rojo</strong> = 1° del grupo · <strong style="color:var(--cobalt)">Azul</strong> = 2° del grupo · <strong style="color:var(--orange)">Naranja</strong> = Mejor 3° (8 de 12 avanzan)',
+    bestThird: 'Mejores Terceros',
+    winBtn: 'Gana',
+    drawBtn: 'Empate',
+    champion: '🏆 Campeón Mundial FIFA 2026',
+    venue: 'MetLife Stadium · East Rutherford, NJ · 19 jul 2026',
+    tbdLabel: 'PD',
+    winLabel: 'GANA',
+    penalties: '⚡ Penales:',
+    thirdHeaders: ['#','Equipo','Grupo','Pts','DG','GF',''],
+    advances: 'Avanza',
+    standingsHeaders: ['Equipo','PJ','G','E','P','DG','Pts'],
+    matchLabel: (id) => typeof id==='number'?`Partido ${id}`:id.replace('R16','Octavos').replace('QF','Cuartos').replace('SF','Semis').replace('FINAL','Final').replace(/-/g,' '),
+  }
+};
+
+let currentLang = 'en';
+function T(key, ...args){ return I18N[currentLang][key] || I18N.en[key]; }
+
+function setLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.toLowerCase()===lang || (lang==='jp'&&b.textContent==='JP') || (lang==='es'&&b.textContent==='ES') || (lang==='en'&&b.textContent==='EN'));
+  });
+  applyLang();
+  renderGroups();
+  if(document.getElementById('tab-standings').classList.contains('active')) renderStandings();
+  const activeKO = ['r32','r16','qf','sf','final'].find(r=>document.getElementById('tab-'+r).classList.contains('active'));
+  if(activeKO){
+    if(activeKO==='r32') renderKO('r32','r32-container',r32Matches,true);
+    else if(activeKO==='r16') renderKO('r16','r16-container',r16Matches,false);
+    else if(activeKO==='qf') renderKO('qf','qf-container',qfMatches,false);
+    else if(activeKO==='sf') renderKO('sf','sf-container',sfMatches,false);
+    else if(activeKO==='final') renderKO('final','final-container',finalMatch,false);
+  }
+}
+
+function applyLang(){
+  const t = I18N[currentLang];
+  document.getElementById('logo-text').textContent = t.logo;
+  document.getElementById('badge-text').textContent = t.badge;
+  // Nav tabs
+  document.querySelectorAll('.nav-tab').forEach((el,i)=>{ el.textContent = t.nav[i]; });
+  // Section titles & subs via data attributes
+  const setText = (id, val) => { const el=document.getElementById(id); if(el) el.innerHTML=val; };
+  setText('sect-groups-title', t.nav[0]);
+  setText('sect-groups-sub', t.groupStageSub);
+  setText('sect-standings-title', t.nav[1]);
+  setText('sect-standings-sub', t.standingsSub);
+  setText('sect-r32-title', t.nav[2]);
+  setText('sect-r32-sub', t.r32Sub);
+  setText('sect-r16-title', t.nav[3]);
+  setText('sect-r16-sub', t.r16Sub);
+  setText('sect-qf-title', t.nav[4]);
+  setText('sect-qf-sub', t.qfSub);
+  setText('sect-sf-title', t.nav[5]);
+  setText('sect-sf-sub', t.sfSub);
+  setText('sect-final-title', t.nav[6]);
+  setText('sect-final-sub', t.finalSub);
+  setText('sect-share-title', t.shareTitle);
+  setText('sect-share-sub', t.shareSub);
+  // Buttons
+  const setBtn = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  setBtn('btn-auto-all', t.autoSimulate);
+  setBtn('btn-clear', t.clear);
+  setBtn('btn-view-standings', t.viewStandings);
+  setBtn('btn-continue-r32', t.continueBtn);
+  setBtn('btn-auto-r32', t.autoSim);
+  setBtn('btn-refresh-r32', t.refresh);
+  setBtn('btn-continue-r16', t.continueR16);
+  setBtn('btn-auto-r16', t.autoSim);
+  setBtn('btn-continue-qf', t.continueQF);
+  setBtn('btn-auto-qf', t.autoSim);
+  setBtn('btn-continue-sf', t.continueSF);
+  setBtn('btn-auto-sf', t.autoSim);
+  setBtn('btn-continue-final', t.continueFinal);
+  setBtn('btn-auto-final', t.autoSim);
+  setBtn('btn-share-bracket', t.shareYourBracket);
+  setBtn('btn-generate-link', t.generateLink);
+  setBtn('btn-share-desc', t.shareDesc);
+  // Info banner
+  setText('info-banner-text', t.infoBanner);
+  // Share
+  const urlBox = document.getElementById('share-url-text');
+  if(urlBox && urlBox.textContent.indexOf('http')===-1) urlBox.textContent = t.sharePrompt;
+  const copyFlash = document.getElementById('copy-flash');
+  if(copyFlash) copyFlash.textContent = t.copied;
+  setText('sect-bracket-title', t.nav[8]||'Bracket');
+  setText('sect-bracket-sub', currentLang==='jp'?'全トーナメントブラケット · ラウンド32 → 決勝':currentLang==='es'?'Bracket completo · Ronda de 32 → Final':'Full tournament bracket · Round of 32 → Final');
+  // Copy link button text (preserve flash span)
+  const copyBtn = document.getElementById('btn-copy-link');
+  if(copyBtn) { copyBtn.childNodes[0].textContent = t.copyLink+' '; }
+}
+const COUNTRY_NAMES = {
+  en: {
+    'Mexico':'Mexico','South Africa':'South Africa','South Korea':'South Korea','Czechia':'Czechia',
+    'Canada':'Canada','Bosnia & Herz.':'Bosnia & Herz.','Qatar':'Qatar','Switzerland':'Switzerland',
+    'Brazil':'Brazil','Morocco':'Morocco','Haiti':'Haiti','Scotland':'Scotland',
+    'USA':'USA','Paraguay':'Paraguay','Australia':'Australia','Türkiye':'Türkiye',
+    'Germany':'Germany','Curaçao':'Curaçao','Ivory Coast':'Ivory Coast','Ecuador':'Ecuador',
+    'Netherlands':'Netherlands','Japan':'Japan','Sweden':'Sweden','Tunisia':'Tunisia',
+    'Belgium':'Belgium','Egypt':'Egypt','Iran':'Iran','New Zealand':'New Zealand',
+    'Spain':'Spain','Cape Verde':'Cape Verde','Saudi Arabia':'Saudi Arabia','Uruguay':'Uruguay',
+    'France':'France','Senegal':'Senegal','Norway':'Norway','Iraq':'Iraq',
+    'Argentina':'Argentina','Algeria':'Algeria','Austria':'Austria','Jordan':'Jordan',
+    'Portugal':'Portugal','DR Congo':'DR Congo','Uzbekistan':'Uzbekistan','Colombia':'Colombia',
+    'England':'England','Croatia':'Croatia','Ghana':'Ghana','Panama':'Panama'
+  },
+  jp: {
+    'Mexico':'メキシコ','South Africa':'南アフリカ','South Korea':'韓国','Czechia':'チェコ',
+    'Canada':'カナダ','Bosnia & Herz.':'ボスニア','Qatar':'カタール','Switzerland':'スイス',
+    'Brazil':'ブラジル','Morocco':'モロッコ','Haiti':'ハイチ','Scotland':'スコットランド',
+    'USA':'アメリカ','Paraguay':'パラグアイ','Australia':'オーストラリア','Türkiye':'トルコ',
+    'Germany':'ドイツ','Curaçao':'キュラソー','Ivory Coast':'コートジボワール','Ecuador':'エクアドル',
+    'Netherlands':'オランダ','Japan':'日本','Sweden':'スウェーデン','Tunisia':'チュニジア',
+    'Belgium':'ベルギー','Egypt':'エジプト','Iran':'イラン','New Zealand':'ニュージーランド',
+    'Spain':'スペイン','Cape Verde':'カーボベルデ','Saudi Arabia':'サウジアラビア','Uruguay':'ウルグアイ',
+    'France':'フランス','Senegal':'セネガル','Norway':'ノルウェー','Iraq':'イラク',
+    'Argentina':'アルゼンチン','Algeria':'アルジェリア','Austria':'オーストリア','Jordan':'ヨルダン',
+    'Portugal':'ポルトガル','DR Congo':'コンゴ民主共和国','Uzbekistan':'ウズベキスタン','Colombia':'コロンビア',
+    'England':'イングランド','Croatia':'クロアチア','Ghana':'ガーナ','Panama':'パナマ'
+  },
+  es: {
+    'Mexico':'México','South Africa':'Sudáfrica','South Korea':'Corea del Sur','Czechia':'Chequia',
+    'Canada':'Canadá','Bosnia & Herz.':'Bosnia y Herz.','Qatar':'Catar','Switzerland':'Suiza',
+    'Brazil':'Brasil','Morocco':'Marruecos','Haiti':'Haití','Scotland':'Escocia',
+    'USA':'EE.UU.','Paraguay':'Paraguay','Australia':'Australia','Türkiye':'Turquía',
+    'Germany':'Alemania','Curaçao':'Curazao','Ivory Coast':'Costa de Marfil','Ecuador':'Ecuador',
+    'Netherlands':'Países Bajos','Japan':'Japón','Sweden':'Suecia','Tunisia':'Túnez',
+    'Belgium':'Bélgica','Egypt':'Egipto','Iran':'Irán','New Zealand':'Nueva Zelanda',
+    'Spain':'España','Cape Verde':'Cabo Verde','Saudi Arabia':'Arabia Saudita','Uruguay':'Uruguay',
+    'France':'Francia','Senegal':'Senegal','Norway':'Noruega','Iraq':'Irak',
+    'Argentina':'Argentina','Algeria':'Argelia','Austria':'Austria','Jordan':'Jordania',
+    'Portugal':'Portugal','DR Congo':'R.D. Congo','Uzbekistan':'Uzbekistán','Colombia':'Colombia',
+    'England':'Inglaterra','Croatia':'Croacia','Ghana':'Ghana','Panama':'Panamá'
+  }
+};
+
+function tname(t){
+  const n = t.split(' ').slice(1).join(' ');
+  const map = COUNTRY_NAMES[currentLang] || COUNTRY_NAMES.en;
+  return map[n] || n;
+}
+
 const GROUPS = {
   A: ['🇲🇽 Mexico','🇿🇦 South Africa','🇰🇷 South Korea','🇨🇿 Czechia'],
   B: ['🇨🇦 Canada','🇧🇦 Bosnia & Herz.','🇶🇦 Qatar','🇨🇭 Switzerland'],
@@ -996,7 +1323,7 @@ function getMatches(g){
 }
 
 /* ── TABS ── */
-const TAB_NAMES = ['groups','standings','r32','r16','qf','sf','final','share'];
+const TAB_NAMES = ['groups','standings','r32','r16','qf','sf','final','share','bracket'];
 
 function showTab(id){
   document.querySelectorAll('.nav-tab').forEach((t,i)=>{
@@ -1005,6 +1332,7 @@ function showTab(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   if(id==='standings') renderStandings();
+  if(id==='bracket') renderBracket();
   updateProgress();
 }
 
@@ -1042,7 +1370,10 @@ function renderGroups(){
     card.innerHTML = `
       <div class="group-card-header">
         <div class="group-label" style="color:${color}">Group ${g}</div>
-        <div class="group-tag g${g.toLowerCase()}" style="color:${color};background:${color}22">${GROUPS[g].map(t=>flag(t)).join('')}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="group-sim-btn" onclick="simulateGroup('${g}')" title="Auto-simulate this group">⚡</button>
+          <div class="group-tag g${g.toLowerCase()}" style="color:${color};background:${color}22">${GROUPS[g].map(t=>flag(t)).join('')}</div>
+        </div>
       </div>
       <div class="group-matches">
         ${ms.map((m,i)=>{
@@ -1051,14 +1382,14 @@ function renderGroups(){
           return`<div class="match-block">
             <div class="match-row-aligned">
               <div class="match-col-team">
-                <button class="rtog-btn win-btn ${tog==='h1'?'active-h1':''}" onclick="applyToggle('${key}','h1','${g}')">Win</button>
+                <button class="rtog-btn win-btn ${tog==='h1'?'active-h1':''}" onclick="applyToggle('${key}','h1','${g}')">${T('winBtn')}</button>
                 <div class="match-team-inner">
                   <span class="match-flag">${flag(m[0])}</span>
-                  <span class="match-name">${name(m[0])}</span>
+                  <span class="match-name">${tname(m[0])}</span>
                 </div>
               </div>
               <div class="match-col-score">
-                <button class="rtog-btn draw-btn ${tog==='draw'?'active-draw':''}" onclick="applyToggle('${key}','draw','${g}')">Draw</button>
+                <button class="rtog-btn draw-btn ${tog==='draw'?'active-draw':''}" onclick="applyToggle('${key}','draw','${g}')">${T('drawBtn')}</button>
                 <div class="match-score-inner">
                   <input class="score-input" type="number" min="0" max="20" value="${sc.h}" placeholder="0"
                     oninput="setScoreWithAutoZero('${key}',this.value,null,'${g}')">
@@ -1068,9 +1399,9 @@ function renderGroups(){
                 </div>
               </div>
               <div class="match-col-team right">
-                <button class="rtog-btn win-btn ${tog==='h2'?'active-h2':''}" onclick="applyToggle('${key}','h2','${g}')">Win</button>
+                <button class="rtog-btn win-btn ${tog==='h2'?'active-h2':''}" onclick="applyToggle('${key}','h2','${g}')">${T('winBtn')}</button>
                 <div class="match-team-inner right">
-                  <span class="match-name right">${name(m[1])}</span>
+                  <span class="match-name right">${tname(m[1])}</span>
                   <span class="match-flag">${flag(m[1])}</span>
                 </div>
               </div>
@@ -1100,6 +1431,16 @@ function setScoreWithAutoZero(key,h,a,g){
     if(groupScores[key].h==='') groupScores[key].h='0';
   }
   // re-render just this group card to update toggle highlight
+  renderGroups();
+  updateProgress();
+}
+
+function simulateGroup(g){
+  getMatches(g).forEach((_,i)=>{
+    const key=`${g}_${i}`;
+    const h=Math.floor(Math.random()*5), a=Math.floor(Math.random()*5);
+    groupScores[key]={h:h+'',a:a+''};
+  });
   renderGroups();
   updateProgress();
 }
@@ -1179,9 +1520,9 @@ function renderStandings(){
         <div style="font-size:13px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif">${rows.map(r=>flag(r.name)).join(' ')}</div>
       </div>
       <table class="standings-table">
-        <thead><tr><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
+        <thead><tr>${T('standingsHeaders').map(h=>`<th>${h}</th>`).join('')}</tr></thead>
         <tbody>${rows.map((r,i)=>`<tr class="${i===0?'rank-q1':i===1?'rank-q2':i===2?'rank-q3':''}">
-          <td><div class="team-cell"><span class="team-cell-flag">${flag(r.name)}</span><span class="team-cell-name">${name(r.name)}</span></div></td>
+          <td><div class="team-cell"><span class="team-cell-flag">${flag(r.name)}</span><span class="team-cell-name">${tname(r.name)}</span></div></td>
           <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
           <td class="${r.gd>0?'gd-pos':r.gd<0?'gd-neg':''}">${r.gd>0?'+':''}${r.gd}</td>
           <td class="pts-cell">${r.pts}</td>
@@ -1196,18 +1537,18 @@ function renderStandings(){
   }).filter(Boolean).sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
 
   document.getElementById('third-place-section').innerHTML=`
-    <div class="section-title" style="font-size:24px;margin-bottom:1rem">Best Third-Placed Teams</div>
+    <div class="section-title" style="font-size:24px;margin-bottom:1rem">${T('bestThird')}</div>
     <div class="third-table-wrap">
     <table class="third-table">
-      <thead><tr><th>#</th><th>Team</th><th>Group</th><th>Pts</th><th>GD</th><th>GF</th><th></th></tr></thead>
+      <thead><tr>${T('thirdHeaders').map(h=>`<th>${h}</th>`).join('')}</tr></thead>
       <tbody>${thirds.map((r,i)=>`<tr class="${i<8?'advancing':''}">
         <td style="color:var(--text-dim);font-weight:700">${i+1}</td>
-        <td><div class="team-cell"><span class="team-cell-flag">${flag(r.name)}</span><span class="team-cell-name">${name(r.name)}</span></div></td>
+        <td><div class="team-cell"><span class="team-cell-flag">${flag(r.name)}</span><span class="team-cell-name">${tname(r.name)}</span></div></td>
         <td style="color:${GROUP_COLORS[r.group]};font-weight:700">${r.group}</td>
         <td class="pts-cell">${r.pts}</td>
         <td class="${r.gd>0?'gd-pos':r.gd<0?'gd-neg':''}">${r.gd>0?'+':''}${r.gd}</td>
         <td>${r.gf}</td>
-        <td>${i<8?'<span class="advancing-badge">Advances</span>':''}</td>
+        <td>${i<8?`<span class="advancing-badge">${T('advances')}</span>`:''}</td>
       </tr>`).join('')}
       </tbody>
     </table></div>`;
@@ -1331,14 +1672,14 @@ function matchCard(round, m){
   const winner=getKOWinner(round,m.id);
   const isTbd1=!m.t1||m.t1==='TBD', isTbd2=!m.t2||m.t2==='TBD';
   const tied=d.h!==undefined&&d.a!==undefined&&d.h!==''&&d.a!==''&&parseInt(d.h)===parseInt(d.a);
-  const matchLabel = typeof m.id==='number'?`Match ${m.id}`:m.id.replace(/-/g,' ');
+  const matchLabel = I18N[currentLang].matchLabel(m.id);
 
   return`<div class="ko-match-card">
     <div class="ko-match-label">${matchLabel}</div>
     <div class="ko-match-inner">
       <div class="ko-team">
         <span class="ko-flag">${isTbd1?'❓':flag(m.t1)}</span>
-        <span class="ko-name ${isTbd1?'tbd':''}">${isTbd1?'TBD':name(m.t1)}</span>
+        <span class="ko-name ${isTbd1?'tbd':''}">${isTbd1?T('tbdLabel'):tname(m.t1)}</span>
       </div>
       <div class="ko-scores">
         <input class="score-input" type="number" min="0" max="20" value="${d.h!==undefined?d.h:''}" placeholder="–" oninput="setKOScore('${round}','${m.id}','h',this.value)" style="width:36px">
@@ -1346,13 +1687,13 @@ function matchCard(round, m){
         <input class="score-input" type="number" min="0" max="20" value="${d.a!==undefined?d.a:''}" placeholder="–" oninput="setKOScore('${round}','${m.id}','a',this.value)" style="width:36px">
       </div>
       <div class="ko-team right">
-        <span class="ko-name ${isTbd2?'tbd':''}">${isTbd2?'TBD':name(m.t2)}</span>
+        <span class="ko-name ${isTbd2?'tbd':''}">${isTbd2?T('tbdLabel'):tname(m.t2)}</span>
         <span class="ko-flag">${isTbd2?'❓':flag(m.t2)}</span>
       </div>
-      ${winner!=='TBD'?`<span class="ko-winner-flag">${flag(winner)} WIN</span>`:''}
+      ${winner!=='TBD'?`<span class="ko-winner-flag">${flag(winner)} ${T('winLabel')}</span>`:''}
     </div>
     ${tied?`<div class="pen-row">
-      ⚡ Penalties:
+      ${T('penalties')}
       <input class="score-input" type="number" min="0" max="20" value="${d.ph!==undefined?d.ph:''}" placeholder="P" oninput="setKOScore('${round}','${m.id}','ph',this.value)" style="width:34px">
       –
       <input class="score-input" type="number" min="0" max="20" value="${d.pa!==undefined?d.pa:''}" placeholder="P" oninput="setKOScore('${round}','${m.id}','pa',this.value)" style="width:34px">
@@ -1374,9 +1715,9 @@ function renderChampion(){
   if(ch&&ch!=='TBD'){
     d.innerHTML=`<div class="champion-card">
       <span class="champion-emoji">${flag(ch)}</span>
-      <div class="champion-label">🏆 FIFA World Cup 2026 Champion</div>
-      <div class="champion-name">${name(ch)}</div>
-      <div class="champion-venue">MetLife Stadium · East Rutherford, NJ · July 19, 2026</div>
+      <div class="champion-label">${T('champion')}</div>
+      <div class="champion-name">${tname(ch)}</div>
+      <div class="champion-venue">${T('venue')}</div>
     </div>`;
   } else {
     d.innerHTML='';
@@ -1411,7 +1752,27 @@ function generateShare(){
   const code=encodeState();
   const url=window.location.href.split('?')[0]+'?wc2026='+code;
   document.getElementById('share-url-text').textContent=url;
-  drawQR(url);
+  const container=document.getElementById('qr-container');
+  container.innerHTML='';
+  try {
+    new QRCode(container, {
+      text: url,
+      width: 180,
+      height: 180,
+      colorDark: '#FFFFFF',
+      colorLight: '#1A237E',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    // Style the generated image
+    setTimeout(()=>{
+      const img=container.querySelector('img');
+      if(img){ img.style.borderRadius='8px'; img.style.border='2px solid #E00000'; img.style.display='block'; }
+      const canvas=container.querySelector('canvas');
+      if(canvas){ canvas.style.borderRadius='8px'; canvas.style.border='2px solid #E00000'; canvas.style.display='block'; }
+    }, 100);
+  } catch(e) {
+    container.innerHTML='<p style="font-size:12px;color:var(--text-muted)">QR generation failed. Copy the link above.</p>';
+  }
 }
 
 function copyLink(){
@@ -1421,30 +1782,13 @@ function copyLink(){
     const f=document.getElementById('copy-flash');
     f.classList.add('show');
     setTimeout(()=>f.classList.remove('show'),2000);
-  }).catch(()=>{});
-}
-
-function drawQR(text){
-  const canvas=document.getElementById('qr-canvas');
-  canvas.style.display='block';
-  const ctx=canvas.getContext('2d');
-  const size=canvas.width;
-  ctx.fillStyle='#1A237E';
-  ctx.fillRect(0,0,size,size);
-  const cols=Math.ceil(Math.sqrt(text.length))+4;
-  const cell=Math.floor(size/cols);
-  ctx.fillStyle='#FFFFFF';
-  for(let i=0;i<text.length;i++){
-    const c=text.charCodeAt(i);
-    const x=(i%cols)*cell, y=Math.floor(i/cols)*cell;
-    if(c%2===0) ctx.fillRect(x+1,y+1,cell-2,cell-2);
-  }
-  ctx.strokeStyle='#E00000';ctx.lineWidth=3;ctx.strokeRect(2,2,size-4,size-4);
-  const qw=cell*3;
-  [[4,4],[size-4-qw,4],[4,size-4-qw]].forEach(([px,py])=>{
-    ctx.fillStyle='#E00000';ctx.fillRect(px,py,qw,qw);
-    ctx.fillStyle='#1A237E';ctx.fillRect(px+cell*.5,py+cell*.5,qw-cell,qw-cell);
-    ctx.fillStyle='#E00000';ctx.fillRect(px+cell,py+cell,cell,cell);
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    const f=document.getElementById('copy-flash');
+    f.classList.add('show'); setTimeout(()=>f.classList.remove('show'),2000);
   });
 }
 
@@ -1463,6 +1807,222 @@ function loadFromUrl(){
     if(Object.keys(koData.sf).length) buildSF();
     if(Object.keys(koData.final).length) buildFinal();
   }catch(e){}
+}
+
+/* ── BRACKET VIEW ── */
+function renderBracket(){
+  const c = document.getElementById('bracket-container');
+  if(!c) return;
+
+  // Ensure standings computed
+  computeStandings();
+
+  // Slot width/height config
+  const SW = 140, SH = 22, GAP = 8;
+  const COL_W = SW + 44;
+
+  // Round labels (left side L→R, right side R→L mirror)
+  // Columns: R32(left), R16(left), QF(left), SF(left), FINAL, SF(right), QF(right), R16(right), R32(right)
+  const totalCols = 9;
+  const CANVAS_W = totalCols * COL_W + 40;
+
+  // 16 slots per R32 side, then 8,4,2,1
+  const rounds = [16,8,4,2,1];
+
+  // ── gather teams in bracket order ──
+  // R32 left side (matches 73,74,75,76,77,78,79,80) top→bottom
+  // R32 right side (matches 81,82,83,84,85,86,87,88) top→bottom
+  function teamSlot(team){
+    if(!team||team==='TBD') return {label:'TBD', flag:'❓'};
+    return {label: tname(team), flag: flag(team)};
+  }
+
+  const leftR32Ids  = [73,74,75,76,77,78,79,80];
+  const rightR32Ids = [81,82,83,84,85,86,87,88];
+
+  function getR32Teams(ids){
+    return ids.flatMap(id=>{
+      const m = r32Matches.find(x=>x.id===id);
+      if(!m) return [{label:'TBD',flag:'❓'},{label:'TBD',flag:'❓'}];
+      return [teamSlot(m.t1), teamSlot(m.t2)];
+    });
+  }
+
+  function getR16Teams(ids){
+    return ids.map(id=> teamSlot(getKOWinner('r32',id)));
+  }
+  function getQFTeams(ids){
+    return ids.map(id=> teamSlot(getKOWinner('r16',id)));
+  }
+  function getSFTeams(ids){
+    return ids.map(id=> teamSlot(getKOWinner('qf',id)));
+  }
+
+  const leftR32   = getR32Teams(leftR32Ids);   // 16 teams
+  const leftR16   = getR16Teams([73,75,77,79,74,76,78,80]);
+  const leftQF    = [teamSlot(getKOWinner('r16','R16-1')),teamSlot(getKOWinner('r16','R16-2')),
+                     teamSlot(getKOWinner('r16','R16-3')),teamSlot(getKOWinner('r16','R16-4'))];
+  const leftSF    = [teamSlot(getKOWinner('qf','QF-1')),teamSlot(getKOWinner('qf','QF-2'))];
+  const finalist1 = teamSlot(getKOWinner('sf','SF-1'));
+  const champion  = teamSlot(getKOWinner('final','FINAL'));
+
+  const rightR32  = getR32Teams(rightR32Ids);
+  const rightR16  = getR16Teams([81,83,85,87,82,84,86,88]);
+  const rightQF   = [teamSlot(getKOWinner('r16','R16-5')),teamSlot(getKOWinner('r16','R16-6')),
+                     teamSlot(getKOWinner('r16','R16-7')),teamSlot(getKOWinner('r16','R16-8'))];
+  const rightSF   = [teamSlot(getKOWinner('qf','QF-3')),teamSlot(getKOWinner('qf','QF-4'))];
+  const finalist2 = teamSlot(getKOWinner('sf','SF-2'));
+
+  // Layout: compute Y positions for each round
+  // R32: 16 slots, total height = 16*(SH+GAP)
+  const totalH = 16*(SH+GAP) + 60; // top padding
+  const CANVAS_H = totalH + 80;
+  const TOP = 50;
+
+  function slotY(count, index, totalSlots){
+    const spacing = (totalH) / totalSlots;
+    return TOP + index * spacing + (spacing - SH) / 2;
+  }
+
+  // colors
+  const C_BG    = '#080b1a';
+  const C_SURF  = '#1A237E';
+  const C_SURF2 = '#141a5e';
+  const C_RED   = '#E00000';
+  const C_LIME  = '#C6FF00';
+  const C_ORANGE= '#FF4500';
+  const C_WHITE = '#FFFFFF';
+  const C_DIM   = 'rgba(255,255,255,0.35)';
+  const C_LINE  = 'rgba(255,255,255,0.18)';
+
+  function roundLabelX(col){ return col * COL_W + 20; }
+
+  let svgParts = [];
+
+  // background
+  svgParts.push(`<rect width="${CANVAS_W}" height="${CANVAS_H}" fill="${C_BG}"/>`);
+
+  // column headers
+  const colLabels = {
+    en: ['R32','R16','QF','SF','FINAL','SF','QF','R16','R32'],
+    jp: ['R32','R16','QF','SF','決勝','SF','QF','R16','R32'],
+    es: ['R32','Octavos','Cuartos','Semis','FINAL','Semis','Cuartos','Octavos','R32']
+  };
+  const labels = colLabels[currentLang]||colLabels.en;
+  labels.forEach((lbl,ci)=>{
+    const x = ci * COL_W + 20 + SW/2;
+    const isCenter = ci===4;
+    svgParts.push(`<text x="${x}" y="30" text-anchor="middle" fill="${isCenter?C_RED:C_LIME}" font-family="'Bebas Neue',sans-serif" font-size="${isCenter?16:12}" letter-spacing="1">${lbl}</text>`);
+  });
+
+  // divider line under headers
+  svgParts.push(`<line x1="0" y1="38" x2="${CANVAS_W}" y2="38" stroke="${C_LINE}" stroke-width="1"/>`);
+
+  // ── SLOT RENDERER ──
+  function slot(x, y, team, isChamp=false, isWinner=false){
+    const bg = isChamp ? C_RED : isWinner ? C_SURF : C_SURF2;
+    const textColor = isChamp ? C_WHITE : team.label==='TBD' ? C_DIM : C_WHITE;
+    const borderColor = isChamp ? C_ORANGE : isWinner ? C_LIME : C_LINE;
+    const h = isChamp ? SH+4 : SH;
+    svgParts.push(`<rect x="${x}" y="${y}" width="${SW}" height="${h}" rx="3" fill="${bg}" stroke="${borderColor}" stroke-width="${isChamp?1.5:0.5}"/>`);
+    // flag
+    svgParts.push(`<text x="${x+5}" y="${y+h*0.72}" font-size="11" fill="${textColor}">${team.flag==='❓'?'':team.flag}</text>`);
+    // name — clip long names
+    const maxChars = 14;
+    const dispName = team.label.length > maxChars ? team.label.slice(0,maxChars)+'…' : team.label;
+    svgParts.push(`<text x="${x+20}" y="${y+h*0.72}" font-family="'Barlow Condensed',sans-serif" font-size="${isChamp?11:10}" font-weight="${isWinner||isChamp?'700':'400'}" fill="${textColor}">${dispName}</text>`);
+  }
+
+  // ── CONNECTOR LINES ──
+  // horizontal line from slot right edge to connector
+  function hLine(x1,y1,x2,y2){ svgParts.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C_LINE}" stroke-width="1"/>`); }
+  function vLine(x,y1,y2){ svgParts.push(`<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${C_LINE}" stroke-width="1"/>`); }
+
+  // Build a round column: array of teams, x position, direction ('left'|'right')
+  // Returns array of {midY} for next round connectors
+  function buildColumn(teams, colIdx, dir){
+    const count = teams.length;
+    const x = colIdx * COL_W + 20;
+    const mids = [];
+    teams.forEach((team,i)=>{
+      const y = slotY(count, i, count);
+      const isWinner = team.label !== 'TBD' && team.label !== '';
+      slot(x, y, team, false, isWinner);
+      mids.push(y + SH/2);
+      // horizontal connector toward center
+      if(dir==='left'){
+        hLine(x+SW, y+SH/2, x+SW+24, y+SH/2);
+      } else {
+        hLine(x-24, y+SH/2, x, y+SH/2);
+      }
+    });
+    // pair them up with vertical connectors
+    for(let i=0;i<count;i+=2){
+      if(i+1<count){
+        const cx = dir==='left' ? colIdx*COL_W+20+SW+24 : colIdx*COL_W+20-24;
+        vLine(cx, mids[i], mids[i+1]);
+      }
+    }
+    return mids;
+  }
+
+  // ── LEFT SIDE ──
+  // col 0: R32 (16 teams)
+  buildColumn(leftR32, 0, 'left');
+  // col 1: R16 (8 teams)
+  buildColumn(leftR16, 1, 'left');
+  // col 2: QF (4 teams)
+  buildColumn(leftQF, 2, 'left');
+  // col 3: SF (2 teams)
+  buildColumn(leftSF, 3, 'left');
+
+  // ── RIGHT SIDE (mirror) ──
+  // col 8: R32
+  buildColumn(rightR32, 8, 'right');
+  // col 7: R16
+  buildColumn(rightR16, 7, 'right');
+  // col 6: QF
+  buildColumn(rightQF, 6, 'right');
+  // col 5: SF
+  buildColumn(rightSF, 5, 'right');
+
+  // ── FINAL CENTER ──
+  const finalCX = 4 * COL_W + 20;
+  const midY1 = slotY(2, 0, 2) + SH/2;
+  const midY2 = slotY(2, 1, 2) + SH/2;
+  const centerY = (midY1 + midY2) / 2;
+
+  // finalist slots (SF winners feeding to center)
+  const sf1Y = slotY(2, 0, 2);
+  const sf2Y = slotY(2, 1, 2);
+
+  // left SF → final connector
+  const leftSFx = 3*COL_W+20+SW+24;
+  const finalLeftX = finalCX;
+  hLine(leftSFx, (slotY(2,0,2)+SH/2 + slotY(2,1,2)+SH/2)/2, finalLeftX, (slotY(2,0,2)+SH/2 + slotY(2,1,2)+SH/2)/2);
+
+  // right SF → final connector
+  const rightSFx = 5*COL_W+20-24;
+  const finalRightX = finalCX + SW;
+  hLine(finalRightX, (slotY(2,0,2)+SH/2 + slotY(2,1,2)+SH/2)/2, rightSFx, (slotY(2,0,2)+SH/2 + slotY(2,1,2)+SH/2)/2);
+
+  // Finalists
+  slot(finalCX - SW - 4, slotY(2,0,2) + (slotY(2,1,2)-slotY(2,0,2))/2 - SH/2 - 14, finalist1, false, finalist1.label!=='TBD');
+  slot(finalCX + SW + 8, slotY(2,0,2) + (slotY(2,1,2)-slotY(2,0,2))/2 - SH/2 - 14, finalist2, false, finalist2.label!=='TBD');
+
+  // Champion slot center
+  const champY = centerY - 13;
+  slot(finalCX, champY, champion, true, false);
+
+  // CHAMPION label
+  const champLabel = currentLang==='jp'?'チャンピオン':currentLang==='es'?'CAMPEÓN':'CHAMPION';
+  svgParts.push(`<text x="${finalCX + SW/2}" y="${champY + SH + 18}" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="14" fill="${C_RED}" letter-spacing="2">${champLabel}</text>`);
+
+  // Trophy emoji center top
+  svgParts.push(`<text x="${finalCX + SW/2}" y="${TOP-8}" text-anchor="middle" font-size="22">🏆</text>`);
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${CANVAS_W}" height="${CANVAS_H}" viewBox="0 0 ${CANVAS_W} ${CANVAS_H}" style="display:block;min-width:${CANVAS_W}px">${svgParts.join('')}</svg>`;
+  c.innerHTML = svg;
 }
 
 loadFromUrl();
